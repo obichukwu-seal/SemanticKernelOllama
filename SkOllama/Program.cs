@@ -4,39 +4,60 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 
-// create httpclient with a timeout of 5 minutes pointing to ollama default endpoint
-
-var endpoint = new Uri("http://localhost:11434");
-var modelId = "llama3.2-vision:11b";
-var httpClient = new HttpClient
-{
-    BaseAddress = endpoint,
-    Timeout = TimeSpan.FromMinutes(5)
-};
-
-#pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-var kernel = Kernel.CreateBuilder()
-    .AddOllamaChatCompletion(modelId: modelId, httpClient: httpClient)
-    .Build();
-#pragma warning restore SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+var builder = Host.CreateApplicationBuilder(args);
+ConfigureServices(builder.Services);
+var host = builder.Build();
+await host.StartAsync();
 
 // Get the chat completion service
-var chatService = kernel.GetRequiredService<IChatCompletionService>();
-// Initialize chat history
-var history = new ChatHistory("You are a helpful assistant.");
+var chatService = host.Services.GetRequiredService<IChatCompletionService>();
+await RunChatAsync(chatService);
 
-while (true)
+async Task RunChatAsync(IChatCompletionService chatService)
 {
-    Console.Write("You: ");
-    var userMessage = Console.ReadLine();
-    if (string.IsNullOrWhiteSpace(userMessage))
+    var history = new ChatHistory("You are a helpful assistant.");
+
+    history.AddUserMessage(new ChatMessageContentItemCollection
     {
-        break;
+        new TextContent("What is this image?"), 
+        new ImageContent(new Uri("https://upload.wikimedia.org/wikipedia/commons/6/62/Panthera_tigris_sumatran_subspecies.jpg"))
+    });
+
+    while (true)
+    {
+        Console.Write("You: ");
+        var userMessage = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(userMessage))
+            break;
+
+        history.AddUserMessage(userMessage);
+        var response = await chatService.GetChatMessageContentAsync(history);
+        Console.WriteLine($"\nBot: {response}\n");
+
+        history.Add(response);
     }
+}
 
-    history.AddUserMessage(userMessage);
-    var response = await chatService.GetChatMessageContentAsync(history);
-    Console.WriteLine($"\nBot: {response}\n");
+void ConfigureServices(IServiceCollection services)
+{
+    var endpoint = new Uri("http://localhost:11434");
+    var modelId = "llama3.2-vision:11b";
+    var httpClient = new HttpClient
+    {
+        BaseAddress = endpoint,
+        Timeout = TimeSpan.FromMinutes(5)
+    };
 
-    history.Add(response);
+    #pragma warning disable SKEXP0070
+    services.AddOllamaChatCompletion(
+        modelId: modelId,
+        httpClient: httpClient
+    );
+    #pragma warning restore SKEXP0070
+
+    services.AddTransient((serviceProvider) =>
+    {
+        return new Kernel(serviceProvider);
+    });
 }

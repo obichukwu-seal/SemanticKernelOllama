@@ -1,0 +1,93 @@
+[
+  {
+    "id": "prod_1001",
+    "name": "Ultra HD Smart TV 55\"",
+    "category": "Electronics",
+    "subcategory": "Televisions",
+    "brand": "Samsung",
+    "price": 799.99,
+    "description": "55-inch 4K UHD smart TV with HDR, Quantum Dot technology, and built-in Alexa compatibility.",
+    "specs": {
+      "screen_size": "55 inches",
+      "resolution": "3840 x 2160",
+      "refresh_rate": "120Hz",
+      "ports": "4 HDMI, 2 USB, Ethernet",
+      "smart_features": [ "Netflix", "YouTube", "Disney+", "Apple TV" ]
+    },
+    "in_stock": true,
+    "rating": 4.7,
+    "reviews_count": 342
+  },
+  {
+    "id": "prod_1002",
+    "name": "Wireless Noise-Canceling Headphones",
+    "category": "Electronics",
+    "subcategory": "Audio",
+    "brand": "Sony",
+    "price": 349.99,
+    "description": "Premium over-ear headphones with industry-leading noise cancellation and 30-hour battery life.",
+    "specs": {
+      "battery_life": "30 hours",
+      "bluetooth_version": "5.0",
+      "weight": "254g",
+      "features": [ "Touch controls", "Built-in microphone", "Fast charging" ]
+    },
+    "in_stock": true,
+    "rating": 4.8,
+    "reviews_count": 512
+  },
+  {
+    "id": "prod_1003",
+    "name": "Stainless Steel Water Bottle",
+    "category": "Home & Kitchen",
+    "subcategory": "Kitchenware",
+    "brand": "Hydro Flask",
+    "price": 39.95,
+    "description": "32oz vacuum insulated stainless steel water bottle that keeps drinks cold for 24 hours or hot for 12 hours.",
+    "specs": {
+      "capacity": "32oz",
+      "material": "18/8 stainless steel",
+      "insulation": "Double-walled vacuum",
+      "lid_type": "Flex cap"
+    },
+    "in_stock": false,
+    "rating": 4.9,
+    "reviews_count": 1287
+  },
+  {
+    "id": "prod_1004",
+    "name": "Organic Cotton T-Shirt",
+    "category": "Clothing",
+    "subcategory": "Men's Apparel",
+    "brand": "Patagonia",
+    "price": 29.50,
+    "description": "Classic fit t-shirt made from 100% organic cotton with reinforced shoulder seams.",
+    "specs": {
+      "material": "100% organic cotton",
+      "sizes": [ "S", "M", "L", "XL", "XXL" ],
+      "colors": [ "Black", "White", "Navy", "Heather Grey" ],
+      "care_instructions": "Machine wash cold, tumble dry low"
+    },
+    "in_stock": true,
+    "rating": 4.5,
+    "reviews_count": 89
+  },
+  {
+    "id": "prod_1005",
+    "name": "Smart Fitness Watch",
+    "category": "Electronics",
+    "subcategory": "Wearables",
+    "brand": "Fitbit",
+    "price": 199.95,
+    "description": "Advanced fitness tracker with heart rate monitoring, GPS, and 7-day battery life.",
+    "specs": {
+      "display": "AMOLED touchscreen",
+      "water_resistance": "50 meters",
+      "sensors": [ "Optical heart rate", "SpO2", "Accelerometer", "Gyroscope" ],
+      "compatibility": [ "Android", "iOS" ]
+    },
+    "in_stock": true,
+    "rating": 4.6,
+    "reviews_count": 421
+  }
+]
