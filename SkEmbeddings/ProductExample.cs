@@ -30,11 +30,11 @@ internal class ProductExample
         _kernel = serviceProvider.GetRequiredService<Kernel>();
         _logger = serviceProvider.GetRequiredService<ILogger<LoggingPromptRenderFilter>>();
 
-        _collectionName = "demo_ProductCollection02";
+        _collectionName = "demo_ProductCollection00";
     }
 
 #pragma warning disable SKEXP0001
-    private async Task<VectorStoreTextSearch<ProductItem>> Initialize()
+    private async Task Initialize()
     {
         var collection = _vectorStore.GetCollection<string, ProductItem>(_collectionName);
         await collection.CreateCollectionIfNotExistsAsync();
@@ -49,15 +49,31 @@ internal class ProductExample
             await collection.UpsertAsync(product);
         }
 
-        return new VectorStoreTextSearch<ProductItem>(collection, _embeddingService);
+        //var searchVector = await _embeddingService.GenerateEmbeddingAsync("Stainless steel");
+        //var search = await collection.VectorizedSearchAsync(searchVector, new VectorSearchOptions<ProductItem>
+        //{
+        //    Top = 4,
+        //    VectorProperty = r => r.Embedding
+        //});
+
+        //var searchList = search.Results.ToBlockingEnumerable().ToList();
+        //foreach (var result in searchList)
+        //{
+        //    Console.WriteLine("Result: " + result.Record.Description);
+        //    Console.WriteLine("Score: " + result.Score);
+        //}
     }
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.        
 
 
     public async Task Chat()
     {
-        var textSearch = await Initialize();
-        
+        await Initialize();
+
+#pragma warning disable SKEXP0001
+        var textSearch = _kernel.GetRequiredService<VectorStoreTextSearch<ProductItem>>();
+#pragma warning restore SKEXP0001
+
         _kernel.PromptRenderFilters.Add(new LoggingPromptRenderFilter(_logger));
         _kernel.Plugins.Add(textSearch.CreateWithGetSearchResults("SearchPlugin"));
 
@@ -105,10 +121,14 @@ internal class ProductExample
         }
     }
 
-#pragma warning disable SKEXP0001 
+
     public async Task EvaluateSearchesAsync()
     {
-        var textSearch = await Initialize();
+        await Initialize();
+
+#pragma warning disable SKEXP0001 
+        var textSearch = _kernel.GetRequiredService<VectorStoreTextSearch<ProductItem>>();
+        var searchByDi = _kernel.GetRequiredService<IVectorizedSearch<ProductItem>>();
 #pragma warning restore SKEXP0001
         var query = "Headphones";
 
@@ -121,8 +141,19 @@ internal class ProductExample
             Console.WriteLine(new string('=', 50));
         }
 
+        var searchVector = await _embeddingService.GenerateEmbeddingAsync(query);
+        var search = await searchByDi.VectorizedSearchAsync(searchVector, new VectorSearchOptions<ProductItem>{ Top = 10 });
+        foreach (var result in search.Results.ToBlockingEnumerable())
+        {
+            Console.WriteLine("Result: " + result.Record.Description);
+            Console.WriteLine("Score: " + result.Score);
+            Console.WriteLine(new string('=', 50));
+        }
+        Console.WriteLine(new string('*', 60));
+        Console.WriteLine(new string('*', 60));
+
         // Search and return results as TextSearchResult items
-        KernelSearchResults<TextSearchResult> textResults = await textSearch.GetTextSearchResultsAsync(query, new() { Top = 10, Skip = 0,  });
+        KernelSearchResults<TextSearchResult> textResults = await textSearch.GetTextSearchResultsAsync(query, new() { Top = 10, Skip = 0, });
         Console.WriteLine("\n--- Text Search Results ---\n");
         await foreach (TextSearchResult result in textResults.Results)
         {
@@ -131,6 +162,17 @@ internal class ProductExample
             Console.WriteLine($"Link:  {result.Link}");
             Console.WriteLine(new string('=', 50));
         }
+
+        search = await searchByDi.VectorizedSearchAsync(searchVector, new VectorSearchOptions<ProductItem> { Top = 10 });
+        foreach (var result in search.Results.ToBlockingEnumerable())
+        {
+            Console.WriteLine("Result: " + result.Record.Name);
+            Console.WriteLine("Result: " + result.Record.Description);
+            Console.WriteLine("Score: " + result.Score);
+            Console.WriteLine(new string('=', 50));
+        }
+        Console.WriteLine(new string('*', 60));
+        Console.WriteLine();
 
         // Search and returns results as DataModel items
         KernelSearchResults<object> fullResults = await textSearch.GetSearchResultsAsync(query, new() { Top = 10, Skip = 0 });
@@ -144,6 +186,19 @@ internal class ProductExample
             Console.WriteLine($"Embedding:   {result.Embedding.Length}");
             Console.WriteLine(new string('=', 50));
         }
+        search = await searchByDi.VectorizedSearchAsync(searchVector, new VectorSearchOptions<ProductItem> { Top = 10 });
+        foreach (var result in search.Results.ToBlockingEnumerable())
+        {
+            Console.WriteLine($"Key:         {result.Record.Id}");
+            Console.WriteLine($"Name:         {result.Record.Name}");
+            Console.WriteLine($"Price:         {result.Record.Price}");
+            Console.WriteLine($"Text:        {result.Record.Description}");
+            Console.WriteLine($"Embedding:   {result.Record.Embedding.Length}");
+            Console.WriteLine("Score: " + result.Score);
+            Console.WriteLine(new string('=', 50));
+        }
+        Console.WriteLine(new string('*', 60));
+        Console.WriteLine();
     }
 }
 

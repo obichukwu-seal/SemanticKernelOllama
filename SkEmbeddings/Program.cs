@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Postgres;
@@ -71,6 +72,16 @@ void ConfigureStoresServices(IServiceCollection services)
         return new PostgresMemoryStore(dataSource, vectorSize: storeSize.Size, schema: "public");
 #pragma warning restore SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     });
+
+    builder.Services.AddTransient<IVectorizedSearch<ProductItem>>( (serviceProvider) => {
+        var _vectorStore = serviceProvider.GetRequiredService<IVectorStore>();
+        var collection = _vectorStore.GetCollection<string, ProductItem>("demo_ProductCollection02");
+
+        return collection;
+    });
+
+    builder.Services.AddVectorStoreTextSearch<ProductItem>();
+
 #pragma warning restore SKEXP0001
 
 #pragma warning disable SKEXP0001
